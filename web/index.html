@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BandTab Studio · 把音乐带进排练室</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="/" aria-label="BandTab 首页"><span class="brand-icon">≋</span><span>BandTab<span class="studio">STUDIO / 本地排练室</span></span></a>
+  <button id="importBtn" class="primary wide">＋ 导入音乐</button>
+  <div class="section-label">你的曲库 <button id="refreshBtn" title="刷新曲库" aria-label="刷新曲库">↻</button></div>
+  <select id="projectPicker" aria-label="打开曲库项目"><option value="">曲库</option></select>
+  <nav id="library" aria-label="项目历史"></nav>
+  <button id="demoBtn" class="demo-link">♫ 体验一段原创 Riff <span>↗</span></button>
+  <div class="sidebar-bottom"><span class="live-dot"></span> 音频留在你的电脑上<p id="engineState">正在检查识别引擎…</p><button id="helpBtn" class="text-button">使用说明与识别边界 ↗</button></div>
+</aside>
+<main>
+  <header class="topbar"><span>WORKSPACE <span class="slash">/</span> 乐队动态谱</span><div><span id="saveState">本地工作区</span><button id="saveBtn" disabled>保存修改</button><button id="exportBtn" disabled>导出 ↗</button></div></header>
+  <section id="welcome" class="welcome">
+    <div class="eyebrow">FROM LISTENING TO PLAYING</div><h1>喜欢的音乐，<br>变成下一次<span>合奏。</span></h1>
+    <p>导入录音，生成可跟弹的谱子。把难句放慢，<br>把每个声部听清楚，再一起把它弹对。</p>
+    <div class="welcome-actions"><button id="welcomeImport" class="primary">＋ 导入你的音乐</button><button id="welcomeDemo">先体验动态谱 →</button></div>
+    <div class="hero-tab" aria-hidden="true"><span>GUITAR / E STANDARD</span><pre>e ────────────────0───────────────
+B ────────────0───────0───────────
+G ────────0───────────────0───────
+D ────2──────────────────────2───
+A ───────────────────────────────
+E ─0─────────────────────────────</pre><i></i><div>01 <b>Em</b><small>每一个音，都回到音乐里。</small></div></div>
+    <div class="feature-row"><div><b>01 / 听清楚</b><span>完整模式分离六个声部</span></div><div><b>02 / 跟得上</b><span>动态指法 · 慢放 · A/B 循环</span></div><div><b>03 / 弹准确</b><span>逐音校正 · MIDI / MusicXML</span></div></div>
+  </section>
+  <section id="workspace" hidden>
+    <div class="project-heading"><div><div class="eyebrow" id="projectType">REHEARSAL SESSION</div><h1 id="projectTitle"></h1><div class="project-meta"><span id="tempoBadge"></span><span id="meterBadge"></span><span id="durationBadge"></span><button id="settingsBtn" class="text-button">节拍校正 ↗</button></div></div><div class="note-total"><strong id="noteTotal">0</strong><span>个音符 / NOTE EVENTS</span></div></div>
+    <div id="notice" class="notice"></div>
+    <section class="transport panel">
+      <div class="transport-main"><button id="playBtn" class="play" aria-label="播放">▶</button><div class="time"><b id="currentTime">0:00.0</b><span id="totalTime">/ 0:00</span></div><label class="compact">速度<select id="speed"><option value="0.5">0.5×</option><option value="0.65">0.65×</option><option value="0.75">0.75×</option><option value="0.85">0.85×</option><option value="1" selected>1.0×</option><option value="1.25">1.25×</option></select></label><div class="transport-divider"></div><button id="setA" title="将当前位置设为循环起点">A <small>起点</small></button><button id="setB" title="将当前位置设为循环终点">B <small>终点</small></button><button id="loopBtn" aria-pressed="false">↻ 循环</button><span id="loopRange" class="muted">未设置</span><label class="follow"><input id="follow" type="checkbox" checked> 自动跟谱</label></div>
+      <canvas id="waveform" height="58" aria-label="音频波形，点击跳转" role="img"></canvas><input id="seek" type="range" min="0" max="1" step="0.01" value="0" aria-label="播放位置">
+    </section>
+    <div class="score-toolbar"><div><h2>乐队总谱</h2><select id="trackView" aria-label="选择显示声部"><option value="all">全部声部</option></select><label class="compact">缩放<input id="zoom" type="range" min="55" max="200" value="95" aria-label="谱面缩放"></label></div><div><label><input id="reviewOnly" type="checkbox"> 突出待复核</label><button id="addNoteBtn">＋ 音符</button><button id="undoBtn" disabled title="撤销上一次编辑">↶ 撤销</button></div></div>
+    <div class="score-panel panel"><div class="score-legend"><span><i class="lime-dot"></i> 指法 / 音高</span><span><i class="amber-dot"></i> 需要复核</span><span>点击音符修改 · 点击空白位置跳转</span></div><div id="scoreScroll"><svg id="score" xmlns="http://www.w3.org/2000/svg" aria-label="动态乐队谱"></svg></div><div class="score-footer"><span>六线谱：上方为 1 弦；数字为相对变调夹的品位</span><span>时间轴保留实际演奏时间 · 导出谱面按十六分量化</span></div></div>
+    <section class="mixer-section"><div class="section-heading"><h2>分轨调音台 <small>听清每个声部</small></h2><div class="segmented"><button id="mixMode" class="active">原曲</button><button id="stemsMode">分轨</button></div></div><div id="mixer"></div></section>
+    <details class="limitations"><summary>识别说明与需要复核的内容</summary><ul id="warnings"></ul></details>
+  </section>
+  <section id="jobPanel" class="job panel" hidden><div><span class="live-dot"></span><b id="jobMessage">准备处理…</b><button id="cancelJob">取消任务</button></div><progress id="jobProgress" max="100" value="0"></progress><p>本机依次处理任务。完整模式首次下载模型，CPU 处理整曲可能需要较长时间。</p></section>
+</main>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<dialog id="importDialog"><form id="importForm"><div class="dialog-heading"><div><div class="eyebrow">NEW SESSION</div><h2>把音乐带进来</h2></div><button type="button" data-close="importDialog" aria-label="关闭">✕</button></div>
+<label id="dropzone" class="dropzone"><span>↥</span><b id="fileLabel">点击选择，或将音频拖到这里</b><small>WAV / MP3 / FLAC / M4A / OGG · 最多 200 MB / 15 分钟</small><input id="audioFile" type="file" accept=".wav,.mp3,.flac,.m4a,.ogg,.aac,.aiff,.opus" required></label>
+<label class="field">识别模式<select id="mode"><option value="preview">基础旋律 · 适合干净的单音乐器</option><option value="instrument">单乐器多音 · 需要 AI 引擎</option><option value="band">完整乐队 · 分离声部 + AI 转写</option></select></label><p id="modeHint" class="hint"></p>
+<div class="form-grid"><label class="field">目标乐器<select id="instrument"><option value="guitar">吉他</option><option value="bass">贝斯</option><option value="piano">键盘</option><option value="vocals">人声</option></select></label><label class="field">吉他调弦<select id="tuning"><option value="standard">标准 E A D G B E</option><option value="drop_d">Drop D · D A D G B E</option><option value="half_down">降半音 · E♭ A♭ D♭ G♭ B♭ E♭</option></select></label><label class="field">变调夹（品）<input id="capo" type="number" min="0" max="12" value="0"></label><label class="field">已知 BPM（0 = 自动）<input id="bpm" type="number" min="0" max="300" value="0" step="0.01"></label><label class="field">拍号<select id="meter"><option value="4">4/4</option><option value="3">3/4</option><option value="6">6/4</option><option value="7">7/4</option></select></label><label class="field">计算设备<select id="device"><option value="cpu">CPU（通用）</option><option value="cuda">NVIDIA CUDA（需适配环境）</option></select></label></div>
+<label class="field">音符门限 <span class="hint">低值保留更多音符，高值减少杂音</span><input id="sensitivity" type="range" min="0.15" max="0.85" step="0.05" value="0.5"></label><p id="importError" class="error" role="alert"></p><button id="startBtn" class="primary wide" type="submit">生成动态谱 →</button></form></dialog>
+<dialog id="noteDialog"><form id="noteForm"><div class="dialog-heading"><h2>校正音符</h2><button type="button" data-close="noteDialog">✕</button></div><p id="noteInfo" class="hint"></p><div class="form-grid"><label class="field">声部<select id="editTrack"></select></label><label class="field">音高（MIDI）<input id="editPitch" type="number" min="0" max="127" required></label><label class="field">开始（秒）<input id="editStart" type="number" min="0" step="0.001" required></label><label class="field">结束（秒）<input id="editEnd" type="number" min="0" step="0.001" required></label><label class="field">弦 / 品位<select id="editPosition"></select></label><label class="field">力度<input id="editVelocity" type="number" min="1" max="127" required></label></div><label><input id="editReview" type="checkbox"> 仍需复核</label><p id="noteError" class="error" role="alert"></p><div class="dialog-actions"><button id="deleteNote" type="button" class="danger">删除音符</button><button type="submit" class="primary">应用修改</button></div></form></dialog>
+<dialog id="settingsDialog"><form id="settingsForm"><div class="dialog-heading"><h2>项目与节拍校正</h2><button type="button" data-close="settingsDialog">✕</button></div><label class="field">曲名<input id="editTitle" maxlength="160" required></label><div class="form-grid"><label class="field">BPM<input id="editBpm" type="number" min="30" max="300" step="0.01" required></label><label class="field">每小节拍数（四分音符）<input id="editMeter" type="number" min="2" max="7" required></label><label class="field">首小节重拍时间（秒）<input id="editOffset" type="number" min="0" step="0.001" required></label></div><p class="hint">修改 BPM 或首拍会改用恒定节拍网格；音符的实际播放时间保持不变。首拍之前的弱起音在导出谱面中归入第 1 小节。</p><button class="primary wide" type="submit">保存校正</button></form></dialog>
+<dialog id="exportDialog"><div class="dialog-heading"><h2>带去下一次排练</h2><button data-close="exportDialog">✕</button></div><p class="hint">导出前自动保存当前修改。</p><div class="export-options"><button data-export="midi"><b>MIDI</b><span>实际时值 · 多声部 · 可导入 DAW</span></button><button data-export="musicxml"><b>MusicXML</b><span>十六分量化 · 指法标记 · 供制谱软件编辑</span></button><button data-export="txt"><b>纯文本六线谱</b><span>轻量分享 · 问号标记待复核音符</span></button><button data-export="json"><b>项目 JSON</b><span>音符与参数备份（不包含音频）</span></button></div></dialog>
+<dialog id="helpDialog"><div class="dialog-heading"><h2>从导入到合奏</h2><button data-close="helpDialog">✕</button></div><ol class="help-list"><li>先体验原创演示，熟悉播放、A/B 循环和音符编辑。</li><li>干净的单音吉他录音可使用基础模式。整首乐队录音请安装完整引擎，选择完整乐队模式。</li><li>优先上传无损音频。先转写 30–60 秒，确认调弦、BPM 与第一小节重拍，再处理整曲。</li><li>橙色音符或“?”需要复核；点击音符可改音高、时间和指法。修改后保存，或导出到制谱软件继续整理。</li></ol><p>快捷键：<kbd>空格</kbd> 播放 / 暂停；<kbd>←</kbd> <kbd>→</kbd> 前后 3 秒。输入框和弹窗内不触发。</p><p class="hint">完整模式使用 Demucs 六轨分离与 Basic Pitch 多音转写。吉他叠录、失真、鼓组分类及演奏技法仍需人工校正。工具不会承诺逐音准确；演示曲不是模型识别结果。</p><p class="hint">安装与命令行用法见项目 README.md。所有项目保存在 data/，模型在 data/models/；删除相应文件夹即可移除本地数据。</p></dialog>
+</body></html>

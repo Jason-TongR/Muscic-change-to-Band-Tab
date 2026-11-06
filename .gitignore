@@ -1,0 +1,10 @@
+.venv*/
+.vendor/
+.tools/
+.python/
+.cache/
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
