@@ -1,59 +1,109 @@
 # BandTab Studio — 音乐转动态乐队谱
 
-给乐队排练用的中文桌面工具。把本地音频导入软件，生成可编辑的乐队谱草稿，边听边跟谱，再把音频和谱子一起分享给队友。
+把本地音乐转成可编辑的乐队谱草稿，边听边跟谱，校正后与队友一起排练。中文桌面界面，支持 AI 分轨、吉他/贝斯弦品、慢放循环和完整项目分享。
 
-**主要流程：导入音乐 → 分轨与转谱 → 听辨校正 → 跟谱排练 → 分享项目。**
+## 先选择你的电脑系统
 
-目前主入口是原生桌面 GUI，不需要打开浏览器。音频在本机处理，不需要账号、API key 或订阅；完整发行包自带运行库和模型。自动转谱的结果仍需校正，具体见[识别能力与限制](#识别能力与限制)。
+| 我的电脑 | 从这里开始 | 当前状态 |
+| --- | --- | --- |
+| Windows 64 位 | [Windows 下载与运行](#windows) | 安装包尚未提供，可尝试源码运行；待实机验证 |
+| macOS（Apple Silicon / Intel） | [macOS 下载与运行](#macos) | 安装包尚未提供，可尝试源码运行；待实机验证 |
+| Linux x86_64 | [Linux 下载与运行](#linux) | 已构建并自检通过便携包，兼容条件见下文 |
 
-[启动软件](#启动软件) · [第一次转谱](#第一次转谱) · [分享与导出](#分享与导出) · [从源码运行](#从源码运行与打包) · [旧网页版与命令行](docs/WEB.md)
+**下载入口：[GitHub Releases](https://github.com/Jason-TongR/Muscic-change-to-Band-Tab/releases)。** 在对应版本的 **Assets（附件）** 中选择系统匹配的文件。只有已经上传的附件才可下载；某个平台没有附件，就表示该平台暂未提供成品包。
+
+完整发行包自带运行库和模型，不需要安装 Python。GitHub 自动显示的 **Source code (zip / tar.gz)** 是源码，不是可直接运行的软件。
+
+以下平台状态截至 **2026-11-07**。首次使用也可以先读[转谱步骤](#第一次转谱)、[分享方式](#分享与导出)和[识别限制](#识别能力与限制)。
+
+### Windows
+
+**目前状态：** 已准备 Windows x64 构建配置，尚未生成或验证 Windows 成品包。
+
+提供成品后，在 Releases 中选择其中一种：
+
+| 附件 | 启动方法 |
+| --- | --- |
+| `BandTabStudio-Windows-x64-Setup.exe` | 运行安装程序，安装后打开 BandTab Studio |
+| `BandTabStudio-Windows-AMD64.zip` | 完整解压，运行文件夹中的 `BandTabStudio.exe`，保留同目录其他文件 |
+
+<details>
+<summary>暂时没有安装包？从源码运行（需要 Python 3.11）</summary>
+
+从仓库的 **Code → Download ZIP** 获取源码并解压。安装 Python 3.11，在包含 `desktop.py` 的项目根目录打开 PowerShell，执行：
+
+```powershell
+py -3.11 scripts/setup_desktop.py
+.\.venv-desktop\Scripts\python.exe desktop.py
+```
+
+首次安装依赖需要联网及数 GB 可用磁盘。以后可以双击 `scripts/start_desktop.bat` 启动。
+
+</details>
+
+### macOS
+
+**目前状态：** 已准备 Apple Silicon 和 Intel 两种构建配置，尚未生成或验证 Mac 成品包。构建目标为 macOS 13 及以上。
+
+在「关于本机」查看处理器，提供成品后选择对应附件：
+
+| 电脑类型 | 附件名称中的标记 |
+| --- | --- |
+| Apple Silicon（M 系列芯片） | `Darwin-arm64` |
+| Intel 处理器 | `Darwin-x86_64` |
+
+下载 `.dmg`，打开后把 `BandTabStudio.app` 复制到「应用程序」；或解压对应 `.zip` 获得应用。是否签名、公证以该版本发布说明为准；未签名预览版可能被系统拦截。
+
+<details>
+<summary>暂时没有安装包？从源码运行（需要 Python 3.11）</summary>
+
+从仓库的 **Code → Download ZIP** 获取源码并解压。安装 Python 3.11，在包含 `desktop.py` 的项目根目录打开终端，执行：
+
+```bash
+python3.11 scripts/setup_desktop.py
+.venv-desktop/bin/python desktop.py
+```
+
+首次安装依赖需要联网及数 GB 可用磁盘。以后可运行 `bash scripts/start_desktop.sh` 启动。
+
+</details>
+
+### Linux
+
+**目前状态：** 已构建并自检通过 `BandTabStudio-Linux-x86_64-glibc2.43.tar.gz`。是否已上传，请查看 [Releases 附件](https://github.com/Jason-TongR/Muscic-change-to-Band-Tab/releases)。
+
+这个包在 Ubuntu 26.04 / x86_64 / glibc 2.43 环境构建，需要兼容的系统图形和音频库；较旧的发行版可能无法启动。请按 Release 标注的兼容条件选包，不能把它当作任意 Linux 都能运行的程序。
+
+1. 下载对应 `.tar.gz`，解压整个压缩包。
+2. 打开解压后的 `BandTabStudio` 文件夹，运行 `BandTabStudio`，或在该文件夹的终端执行：
+
+```bash
+./启动BandTab.sh
+```
+
+3. 软件打开后，点击「原创练习曲」体验功能。
+
+当前包约 489 MiB，解压后约 1.4 GiB，曲库与计算缓存会继续占用磁盘。**请保留完整目录，不要只复制可执行文件。**
+
+<details>
+<summary>从源码运行（需要 Python 3.11）</summary>
+
+从仓库的 **Code → Download ZIP** 获取源码并解压。安装 Python 3.11，在包含 `desktop.py` 的项目根目录打开终端，执行：
+
+```bash
+python3.11 scripts/setup_desktop.py
+.venv-desktop/bin/python desktop.py
+```
+
+首次安装依赖需要联网及数 GB 可用磁盘。以后可运行 `bash scripts/start_desktop.sh` 启动。源码运行同样需要兼容的系统图形和音频库。
+
+</details>
+
+## 界面预览
 
 ![BandTab Studio 桌面界面](docs/desktop-preview.png)
 
-*图中是预先编写音符的原创合成演示，用来展示界面，不代表自动识别准确率。*
-
-## 当前哪些系统可以用
-
-截至 2026-11-07，三个系统共用桌面代码，但安装包的完成情况不同：
-
-| 系统 | 当前交付状态 | 使用前需要知道 |
-| --- | --- | --- |
-| Linux x86_64 | 已生成便携包，已验证独立启动和 AI 转写 | 本地包在 Ubuntu 26.04 构建，要求 glibc 2.43 及兼容的系统图形、音频库；不适用于所有 Linux 发行版 |
-| Windows x64 | 源码、便携包构建和安装程序配置已准备 | 本次尚未生成或验证 Windows 安装包 |
-| macOS Apple Silicon / Intel | 源码、APP / ZIP / DMG 构建配置已准备 | 本次尚未生成或验证 Mac 安装包；构建目标为 macOS 13 及以上 |
-
-Windows 和 macOS 的构建配置不等于已经可用的安装包。需要在对应系统完成构建与运行检查，才能交付给该系统的使用者。
-
-## 启动软件
-
-### 拿到完整发行包的使用者
-
-普通使用者不需要安装 Python，也不需要运行安装依赖的脚本。
-
-当前本地工程已生成：
-
-```text
-release/BandTabStudio-Linux-x86_64-glibc2.43.tar.gz
-```
-
-1. 确认电脑符合上表中的 Linux 条件。
-2. 解压整个压缩包，保留里面的所有文件。
-3. 打开解压后的 `BandTabStudio` 文件夹，运行 `BandTabStudio`；也可以运行同目录的 `启动BandTab.sh`。
-4. 在软件左下点击「原创练习曲」，先体验动态谱、编辑和分轨控制。
-
-**不要只把可执行文件单独拿出来。** 它需要同目录中的运行库和模型。当前压缩包约 489 MB，解压后约 1.4 GB，识别缓存和歌曲项目还会继续占用磁盘。
-
-`release/` 是本地构建产物，不随源码提交。下载源码仓库的 ZIP 不会得到上面的便携包；只有源码时，请看[从源码运行与打包](#从源码运行与打包)。
-
-### 正在使用这份已经配置好的工程
-
-在项目根目录运行下面的命令即可打开桌面版：
-
-```bash
-bash scripts/start_desktop.sh
-```
-
-这个命令适用于已有桌面依赖的 Linux/macOS 开发环境。新电脑需要先完成源码环境安装。旧的 `scripts/start.sh` 启动的是网页版，两者用途不同。
+*图中是预先编写音符的原创合成演示，用来展示功能，不代表自动识别准确率。*
 
 ## 第一次转谱
 
@@ -99,7 +149,7 @@ bash scripts/start_desktop.sh
 
 `.bandtab` 包含谱子、原曲和分离音轨；对方可以直接跟谱、试听和编辑，不需要重新识别。**它不是安装包，不能代替软件。**
 
-本地 `release/原创练习曲.bandtab` 可用于测试这套分享流程。
+如果 Release 附带 `原创练习曲.bandtab`，可以下载后通过「打开分享项目…」导入，测试这套分享流程。
 
 ### 交给其他音乐软件继续处理
 
@@ -142,56 +192,35 @@ MIDI 保留音符实际起止时间，使用固定 120 BPM 编码，不包含原
 
 **没有声音？** 先检查系统输出设备，再确认分轨的静音、独奏和音量设置。提示「未检测到音频输出设备」时，需要先让系统识别扬声器或耳机。
 
-**提示缺少 AI 引擎？** 普通使用者应使用完整发行包；源码使用者按下一节安装。只安装基础依赖无法运行完整乐队模式。
+**提示缺少 AI 引擎？** 普通使用者应使用完整发行包；源码使用者按上方对应系统的步骤安装。只安装基础依赖无法运行完整乐队模式。
 
-## 从源码运行与打包
+## 开发与构建
 
-这一节面向开发或自行构建软件的人。拿到完整发行包的使用者可以跳过。
+先按上方对应系统的步骤创建 `.venv-desktop` 环境。所有命令均在项目根目录执行。源码、文档和构建配置保存在 Git 仓库；生成的软件包通过 Releases 分发。
 
-需要 **Python 3.11**、联网下载依赖，以及数 GB 可用磁盘。所有命令都在项目根目录执行；脚本创建独立的 `.venv-desktop` 环境，默认安装 CPU 版识别引擎。
+| 操作 | Windows PowerShell | Linux / macOS 终端 |
+| --- | --- | --- |
+| 运行桌面版 | `.\.venv-desktop\Scripts\python.exe desktop.py` | `.venv-desktop/bin/python desktop.py` |
+| 构建发行包 | `.\.venv-desktop\Scripts\python.exe scripts/build_desktop.py --archive` | `.venv-desktop/bin/python scripts/build_desktop.py --archive` |
+| 运行测试 | `.\.venv-desktop\Scripts\python.exe -m unittest discover -s tests -v` | `.venv-desktop/bin/python -m unittest discover -s tests -v` |
 
-**Windows（PowerShell）：**
+打包需在目标系统分别执行。程序目录生成在 `dist/`，发布用的压缩包等产物生成在 `release/`。Windows 安装程序额外需要 Inno Setup；Mac 签名、公证和其他平台细节见[桌面版详细说明](docs/DESKTOP.md#三个平台的打包)。
 
-```powershell
-py -3.11 scripts/setup_desktop.py
-.\.venv-desktop\Scripts\python.exe desktop.py
-```
+仓库提供[手动构建工作流](.github/workflows/desktop-build.yml)。它分别构建四个平台并自检，产物保存在 Actions artifacts；不会自动创建或发布 GitHub Release。
 
-**Linux / macOS：**
+想继续使用浏览器版或命令行批量转写，请看[旧网页版与命令行说明](docs/WEB.md)。`scripts/start.sh` 是网页版入口，`scripts/start_desktop.sh` 是桌面版入口。
 
-```bash
-python3.11 scripts/setup_desktop.py
-.venv-desktop/bin/python desktop.py
-```
+### 验证范围
 
-安装成功后，Windows 也可双击 `scripts/start_desktop.bat`；Linux/macOS 可运行 `bash scripts/start_desktop.sh`。
-
-打包需在目标系统分别执行：Windows 使用 `.\.venv-desktop\Scripts\python.exe`，Linux/macOS 使用 `.venv-desktop/bin/python`，后接 `scripts/build_desktop.py --archive`。例如 Linux/macOS：
-
-```bash
-.venv-desktop/bin/python scripts/build_desktop.py --archive
-```
-
-程序目录生成在 `dist/`，压缩包等产物生成在 `release/`。Windows 安装程序额外需要 Inno Setup；Mac 签名、公证和各平台构建细节见[桌面版详细说明](docs/DESKTOP.md#三个平台的打包)。
-
-仓库提供[手动构建工作流](.github/workflows/desktop-build.yml)，用于在 Windows、Linux、Mac Intel 和 Apple Silicon 环境分别构建、自检；本次没有触发远程构建或发布。
-
-### 已验证到什么程度
-
-截至 2026-11-07，Linux 环境的 26 项自动测试已通过；独立程序已通过界面渲染、项目分享包导入导出、识别进程和真实 AI 分离转谱检查。
+截至 2026-11-07，Linux 环境的 26 项自动测试已通过；独立程序已通过界面渲染、项目包导入导出、识别进程和真实 AI 分离转谱检查。
 
 当前测试环境没有实体显示会话和音频输出设备，界面使用离屏渲染检查；实际扬声器播放以及 Windows/macOS 安装运行仍需对应设备验证。这些检查证明功能流程可运行，不代表真实歌曲识别准确率。
 
-复查命令如下（Windows 将 Python 路径换成 `.\.venv-desktop\Scripts\python.exe`）：
-
-```bash
-.venv-desktop/bin/python -m unittest discover -s tests -v
-.venv-desktop/bin/python desktop.py --self-test
-.venv-desktop/bin/python desktop.py --self-test --ai
-```
+程序支持 `--self-test` 自检，附加 `--ai` 会实际运行模型。使用上表中的环境 Python 执行 `desktop.py --self-test --ai`；打包后也可以让可执行程序带上同样参数运行。
 
 ## 更多文档
 
 - [桌面版详细说明](docs/DESKTOP.md)：离线模型、数据、打包与平台限制。
 - [旧网页版与命令行](docs/WEB.md)：原有浏览器入口、批量转谱和技术细节。
+- [GitHub 发布指南](docs/PUBLISHING.md)：维护者填写 About、创建 Release 和选择附件的方法。
 - [第三方组件说明](packaging/THIRD_PARTY.md)：随软件分发的依赖与许可证。
