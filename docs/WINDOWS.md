@@ -21,7 +21,7 @@
 
 ## 开发者一键构建
 
-在 Windows x64 上安装 Python 3.11 x64 和 Inno Setup 6.5 及以上，然后在工程根目录运行 `build-windows.cmd`。构建器需要 Inno Setup 自带的 `Languages/ChineseSimplified.isl`；找不到编译器时可以用环境变量 `ISCC` 指向完整的 `ISCC.exe` 路径。
+在 Windows x64 上安装 Python 3.11 x64 和 Inno Setup 6.5 及以上，然后在工程根目录运行 `build-windows.cmd`。构建器优先使用 Inno Setup 自带的简体中文语言文件；缺少时从官方仓库下载固定版本并校验 SHA-256。找不到编译器时可以用环境变量 `ISCC` 指向完整的 `ISCC.exe` 路径。
 
 它依次执行：
 
