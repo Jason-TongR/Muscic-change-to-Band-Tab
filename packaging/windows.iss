@@ -2,6 +2,9 @@
 #ifndef MyAppVersion
   #define MyAppVersion "0.2.1"
 #endif
+#ifndef MyLanguageFile
+  #define MyLanguageFile "compiler:Languages\ChineseSimplified.isl"
+#endif
 [Setup]
 AppId={{C893045E-E753-491D-93B0-FD1EF9088E15}
 AppName={#MyAppName}
@@ -26,7 +29,7 @@ CloseApplications=yes
 RestartApplications=no
 
 [Languages]
-Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
+Name: "chinesesimplified"; MessagesFile: "{#MyLanguageFile}"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [CustomMessages]
