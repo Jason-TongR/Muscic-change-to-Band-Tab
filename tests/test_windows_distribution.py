@@ -25,7 +25,7 @@ class WindowsDistributionTests(unittest.TestCase):
         with patch('bandtab.runtime.os.name','nt'):
             self.assertEqual(process_options(),{'creationflags':0x08000000})
     def test_clean_execution_cannot_import_from_build_environment(self):
-        with patch.dict(os.environ,{'SystemRoot':'C:/Windows','PYTHONPATH':'build-packages',
+        with patch.dict(os.environ,{'SYSTEMROOT':'C:/Windows','PYTHONPATH':'build-packages',
                 'PYTHONHOME':'python-install','BANDTAB_MODEL_HOME':'build-models','VIRTUAL_ENV':'builder'}):
             env=isolated_environment(Path('C:/test library'))
         for key in ('PYTHONPATH','PYTHONHOME','VIRTUAL_ENV','BANDTAB_MODEL_HOME'):

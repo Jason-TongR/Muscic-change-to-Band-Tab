@@ -45,7 +45,7 @@ class DesktopStorageTests(unittest.TestCase):
         (self.folder/'guitar.wav').unlink()
         with self.assertRaises(ValueError):self.library.load(self.p['id'])
     def test_data_override_and_source_worker(self):
-        with patch.dict(os.environ,{'BANDTAB_HOME':str(self.root)}):self.assertEqual(user_data_dir(),self.root)
+        with patch.dict(os.environ,{'BANDTAB_HOME':str(self.root)}):self.assertTrue(user_data_dir().samefile(self.root))
         command=worker_command('--worker','request.json');self.assertTrue(command[1].endswith('desktop.py'));self.assertEqual(command[-2:],['--worker','request.json'])
     def test_cancelled_worker_does_not_publish_project(self):
         import desktop
