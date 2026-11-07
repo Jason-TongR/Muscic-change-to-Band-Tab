@@ -55,64 +55,63 @@ python
 
 不要把整个工作文件夹再打成一个 ZIP 当安装包，也不要强制把上面的忽略目录加入 Git。当前 Linux 包约 489 MiB，适合放在 Releases；普通 Git 仓库会阻止超过 100 MiB 的单个文件。[GitHub 大文件说明](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
 
-## 3. 这一次 Release 填什么
+## 3. Windows 这一版 Release 怎么填
 
-建议先发布 Linux 预览版：
+Windows 版的应用版本是 **0.2.1**。先等 Windows 工作流成功、确认 `Windows-validation.json` 中的 `status` 为 `pass`，再发布该次构建的附件。
 
-| 字段 | 建议填写 |
+| 字段 | 填写内容 |
 | --- | --- |
-| Tag | `v0.2.0-preview.1` |
-| Target | 包含这次桌面程序源码及文档的提交或分支 |
-| Release title | `BandTab Studio v0.2.0-preview.1 · Linux 桌面预览版` |
-| Description | 复制[已写好的发布说明](releases/v0.2.0-preview.1.md)全文 |
-| This is a pre-release | 勾选，表示预览版本 |
+| Tag | `v0.2.1-preview.1`（已使用则换新标签） |
+| Target | 生成本次软件包的提交，见 `build-info-Windows-AMD64.json` 的 `source_revision` |
+| Release title | `BandTab Studio v0.2.1-preview.1 · Windows 桌面预览版` |
+| Description | 复制[Windows 发布说明](releases/v0.2.1-preview.1.md)全文 |
+| This is a pre-release | 勾选 |
 
-这个 tag 是发布标签；当前应用内版本号为 0.2.0。如果该 tag 已被使用，选择新标签，不要用新包覆盖旧版标识。
+在仓库 [Releases](https://github.com/Jason-TongR/Muscic-change-to-Band-Tab/releases) 点击创建新版本，填以上内容。**Target 必须包含 Windows 版源码**；如果还没合并构建分支，不要直接用旧的 `main` 发布新软件包。
 
-进入仓库的 [Releases 页面](https://github.com/Jason-TongR/Muscic-change-to-Band-Tab/releases)，创建新 Release，填写标签、标题和说明，再上传下表文件。可以先保存草稿，检查附件后发布。[GitHub 创建 Release 说明](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)
+### 上传哪些附件
 
-### 这次要上传的三个文件
+从成功的 Windows 构建页面下载 `BandTabStudio-Windows-x64`，解压 Actions 外层 ZIP，上传里面这 **6 个文件**：
 
-这些文件已在本地项目根目录的 `release/` 中生成：
-
-| 文件 | 大小约值 | 作用 |
+| 文件 | 是否需要 | 用途 |
 | --- | --- | --- |
-| `BandTabStudio-Linux-x86_64-glibc2.43.tar.gz` | 489 MiB | 用户下载的完整 Linux 程序，包含运行库和模型 |
-| `SHA256SUMS.json` | 119 B | 校验文件，目前记录上述 Linux 程序包的 SHA-256 |
-| `原创练习曲.bandtab` | 1.3 MiB | 示例歌曲项目，包含音频和预先编写的谱子；不是软件 |
+| `BandTabStudio-Windows-x64-Setup.exe` | 必须 | 推荐给普通用户的中文安装程序 |
+| `BandTabStudio-Windows-x64-Portable.zip` | 必须 | 免安装完整便携包 |
+| `原创练习曲.bandtab` | 建议 | 含音频与预编谱的示例项目 |
+| `SHA256SUMS.json` | 必须 | 核对上述两个软件包和示例文件的完整性 |
+| `Windows-validation.json` | 建议 | 本次 Windows 安装与模型测试结果 |
+| `build-info-Windows-AMD64.json` | 建议 | 应用版本、源码提交、依赖版本与校验记录 |
 
-发布说明粘贴在 Release 的描述框中，无需把 Markdown 文件再作为附件上传。README 中已有界面截图，也不必作为下载附件重复上传。
+**不要上传** `dist/` 整个目录、开发环境、日志大包，或 Actions 外层 ZIP。发布说明粘贴到描述框即可，不必再作为附件上传。GitHub 自动提供的 `Source code (zip / tar.gz)` 不是安装程序。
 
-GitHub 会自动提供 `Source code (zip)` 和 `Source code (tar.gz)`，不需要你再上传源码压缩包。这两个附件不能替代程序包。Release 单个附件需小于 2 GiB，当前 Linux 包符合该限制。[GitHub Releases 说明](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)
+可先保存为草稿，确认文件齐全后发布。预览包未做代码签名，需在说明中保留这一点；云端测试也不能代替真实电脑的扬声器与耳机测试。
 
-### 本次发布说明应保留的兼容范围
+### Linux 旧包怎么处理
 
-- 仅提供 Linux x86_64 成品包，构建环境为 Ubuntu 26.04 / glibc 2.43。
-- Windows、Mac 尚无经过验证的成品包，不要写成已经发布三平台安装包。
-- 当前测试验证了离屏界面、文件流程和模型推理，没有验证实体扬声器播放。
-- 识别结果仍需人工复核，示例曲不作为准确率证明。
+本地原有 `release/BandTabStudio-Linux-x86_64-glibc2.43.tar.gz` 属于 **0.2.0**，在 Ubuntu 26.04 / glibc 2.43 构建。它的[原发布说明](releases/v0.2.0-preview.1.md)继续保留。不要把旧的 Linux 包改名为 0.2.1，或与 Windows 的新校验文件混用。
 
-## 4. 后续如何补齐 Windows 和 Mac
+不同版本应分别建 Release。以后同一版本需要发布多个系统包时，可以合并各自的校验记录，或者将校验文件改成带系统名的名称，避免同名覆盖。仅记录实际上传的文件。
 
-1. 将源码和 `.github/workflows/desktop-build.yml` 推送到 GitHub 默认分支。
-2. 进入仓库 Actions，找到 **Build desktop applications**，手动运行 **Run workflow**。
-3. 等相应平台的构建和自检任务成功，下载其 Actions artifact。
-4. 解压 artifact，取其中 `release/` 里的成品文件；不要把 Actions artifact 外层 ZIP 直接当安装包发布。
-5. 在对应系统检查实际启动与音频播放，再上传对应版本的 Release，并更新 README 的平台状态。
+## 4. 下次怎样重新生成 Windows 包
 
-当前工作流只构建、测试并保存产物，不自动发布 Release。各平台任务独立执行，一种平台通过不代表其他平台也通过。
+普通使用者从 Release 下载软件，不需要进行这些步骤。维护者有两种构建方式：
 
-按当前构建脚本，成功构建后可获得：
+1. **使用 GitHub：** 推送本次源码后，在 Actions 中打开 **Build Windows installer**。相关源码变更会触发；默认分支已有工作流后也可手动运行。成功后下载 `BandTabStudio-Windows-x64`。失败时下载 `BandTabStudio-Windows-diagnostics` 查看日志与截图。
+2. **使用 Windows 电脑：** 安装 Python 3.11 x64 与 Inno Setup 6.5 及以上，双击项目根目录的 `build-windows.cmd`。成品在 `release/`。完整操作见 [Windows 构建说明](WINDOWS.md#开发者一键构建)。
 
-| 平台 | 成品附件 |
+专用 Windows 流程会验证：源码测试、完整便携包、中文路径、Windows 原生窗口、离线模型转写、安装与快捷方式、项目打开命令、重复安装及卸载保留曲库。工作流只保存成品，**不会自动发布 Release**。
+
+## 5. macOS 与多平台发布
+
+在 Actions 运行 **Build desktop applications** 可分别构建四个平台。各个平台任务独立；一种平台通过不代表其他平台通过。
+
+| 平台 | 成品文件 |
 | --- | --- |
-| Windows x64 | `BandTabStudio-Windows-AMD64.zip`；构建环境装有 Inno Setup 时另有 `BandTabStudio-Windows-x64-Setup.exe` |
+| Windows x64 | `BandTabStudio-Windows-x64-Setup.exe`、`BandTabStudio-Windows-x64-Portable.zip` |
 | macOS Apple Silicon | `BandTabStudio-Darwin-arm64.dmg` 和 `.zip` |
 | macOS Intel | `BandTabStudio-Darwin-x86_64.dmg` 和 `.zip` |
 | Linux x86_64 | `BandTabStudio-Linux-x86_64-glibc<构建机版本>.tar.gz` |
 
-Mac 的 DMG 和 ZIP 是同一应用的两种分发方式，可以只上传 DMG。Intel 与 Apple Silicon 必须分清架构，不能只改文件名当作另一种架构的程序。
+Mac 的 DMG 和 ZIP 是同一应用的两种分发方式，发布时可只选 DMG。Intel 与 Apple Silicon 分开构建；不能改名冒充另一种架构。当前 Mac 成品仍待构建与验证，签名、公证也需另行完成。README 只标注实际通过的状态。
 
-每个平台会生成自己的 `SHA256SUMS.json`。合并多个平台发布时，把各包记录合并到一个文件，或分别重命名为带平台名的校验文件，避免同名覆盖；只保留本次实际上传附件的校验记录。
-
-Windows/Mac 上传后，再把 README 中对应平台的「尚未提供」改为实际验证状态。对于已经发布且禁止修改附件的版本，创建新的 Release。
+参考：[GitHub 创建 Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository)、[附件限制](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases)。
