@@ -4,6 +4,19 @@ import sys
 from pathlib import Path
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules, copy_metadata, get_package_paths
 ROOT=Path(SPECPATH).parent
+sys.path.insert(0,str(ROOT))
+from bandtab import __version__
+windows_options={}
+if sys.platform=='win32':
+    from PyInstaller.utils.win32.versioninfo import VSVersionInfo,FixedFileInfo,StringFileInfo,StringTable,StringStruct,VarFileInfo,VarStruct
+    version=tuple(int(v) for v in __version__.split('.'))+(0,)
+    windows_options=dict(manifest=str(ROOT/'packaging/windows.manifest'),version=VSVersionInfo(
+        ffi=FixedFileInfo(filevers=version,prodvers=version,mask=0x3f,flags=0,OS=0x40004,fileType=1,subtype=0,date=(0,0)),
+        kids=[StringFileInfo([StringTable('040904B0',[StringStruct(k,v) for k,v in {
+            'CompanyName':'BandTab','FileDescription':'BandTab Studio - Music Transcription',
+            'FileVersion':__version__,'ProductVersion':__version__,'ProductName':'BandTab Studio',
+            'OriginalFilename':'BandTabStudio.exe','InternalName':'BandTabStudio'}.items()])]),
+            VarFileInfo([VarStruct('Translation',[1033,1200])])]))
 hidden=['demucs.separate','demucs.htdemucs','basic_pitch.inference','onnxruntime','soundfile',
         'scipy.special._ufuncs','PySide6.QtMultimedia','bandtab.desktop.smoke']
 datas=[(str(ROOT/'assets'/'icon.png'),'assets'),(str(ROOT/'docs'/'DESKTOP.md'),'docs'),(str(ROOT/'packaging'/'THIRD_PARTY.md'),'licenses')]
@@ -31,9 +44,9 @@ a=Analysis([str(ROOT/'desktop.py')],pathex=[str(ROOT)],binaries=[],datas=datas,h
 pyz=PYZ(a.pure)
 exe=EXE(pyz,a.scripts,[],exclude_binaries=True,name='BandTabStudio',debug=False,bootloader_ignore_signals=False,
     strip=False,upx=False,icon=str(ROOT/'assets'/'icon.ico') if sys.platform=='win32' else None,console=False,disable_windowed_traceback=False,argv_emulation=False,
-    target_arch=None,codesign_identity=os.environ.get('BANDTAB_SIGN_IDENTITY'),entitlements_file=None)
+    target_arch=None,codesign_identity=os.environ.get('BANDTAB_SIGN_IDENTITY'),entitlements_file=None,**windows_options)
 coll=COLLECT(exe,a.binaries,a.datas,strip=False,upx=False,name='BandTabStudio')
 if sys.platform=='darwin':
     app=BUNDLE(coll,name='BandTabStudio.app',icon=str(ROOT/'assets'/'icon.icns'),bundle_identifier='studio.bandtab.desktop',
-        info_plist={'CFBundleShortVersionString':'0.2.0','NSHighResolutionCapable':True,
+        info_plist={'CFBundleShortVersionString':__version__,'NSHighResolutionCapable':True,
                     'NSHumanReadableCopyright':'BandTab Studio; see bundled third-party license notices.'})
