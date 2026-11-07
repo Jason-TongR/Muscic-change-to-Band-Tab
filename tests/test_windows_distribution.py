@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from bandtab.runtime import ensure_model,process_options
-from scripts.build_desktop import checksums,find_inno
+from scripts.build_desktop import checksums,find_inno,inno_language
 from scripts.check_windows_release import assert_x64_executable,isolated_environment
 
 
@@ -58,6 +58,14 @@ class WindowsDistributionTests(unittest.TestCase):
             compiler=Path(tmp)/'ISCC.exe';compiler.touch()
             with patch.dict(os.environ,{'ISCC':str(compiler)}):
                 self.assertEqual(find_inno(),compiler)
+    def test_installer_translation_download_rejects_corrupt_data(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            with patch('scripts.build_desktop.urllib.request.urlopen') as network:
+                network.return_value.__enter__.return_value.read.return_value=b'wrong translation'
+                with self.assertRaisesRegex(ValueError,'checksum mismatch'):
+                    inno_language(root/'ISCC.exe',root/'cache')
+            self.assertFalse((root/'cache/ChineseSimplified.isl').exists())
 
 
 if __name__=='__main__':unittest.main()
