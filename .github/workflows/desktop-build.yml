@@ -25,6 +25,8 @@ jobs:
       OPENBLAS_NUM_THREADS: '2'
       NUMBA_NUM_THREADS: '2'
       BANDTAB_HOME: ${{ github.workspace }}/data/ci-home
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -49,12 +51,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          & .venv-desktop/Scripts/python.exe -m unittest discover -s tests -v
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          & .venv-desktop/Scripts/python.exe scripts/build_desktop.py --archive
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $p = Start-Process -FilePath dist/BandTabStudio/BandTabStudio.exe -ArgumentList '--self-test','--ai' -PassThru -Wait
-          exit $p.ExitCode
+          ./scripts/build_windows.ps1 -SkipSetup
       - uses: actions/upload-artifact@v4
         with:
           name: BandTab-${{ matrix.name }}
@@ -62,4 +59,6 @@ jobs:
             release/*
             data/ci-home/self-test-report.json
             data/ci-home/desktop-preview.png
+            data/windows-validation/*.json
+            data/windows-validation/*.png
           if-no-files-found: error
