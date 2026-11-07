@@ -55,7 +55,8 @@ def isolated_environment(home):
     env=os.environ.copy()
     for key in ('PYTHONHOME','PYTHONPATH','VIRTUAL_ENV','BANDTAB_MODEL_HOME','NUMBA_CACHE_DIR','MPLCONFIGDIR'):
         env.pop(key,None)
-    system=Path(env['SystemRoot'])
+    # os.environ is case-insensitive on Windows; its plain dict copy is not.
+    system=Path(next(value for key,value in env.items() if key.upper()=='SYSTEMROOT'))
     env.update(PATH=os.pathsep.join(str(p) for p in (system/'System32',system)),
         BANDTAB_HOME=str(home),BANDTAB_OFFLINE='1',PYTHONNOUSERSITE='1',
         QT_QPA_PLATFORM='windows',PYTHONUTF8='1',OMP_NUM_THREADS='2',
