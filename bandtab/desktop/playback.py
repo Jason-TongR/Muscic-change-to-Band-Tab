@@ -32,6 +32,15 @@ class Transport(QObject):
         self.volumes()
         if not QMediaDevices.audioOutputs():
             self.error.emit('未检测到音频输出设备。可以转写和编辑，请在系统声音设置中连接扬声器或耳机。')
+    def shutdown(self):
+        """Release decoder file handles before Windows closes/deletes a project."""
+        self.timer.stop()
+        self.stop()
+        for player in self.players:
+            player.setSource(QUrl())
+            player.deleteLater()
+        for output in self.outputs:output.deleteLater()
+        self.players=[];self.outputs=[];self.master=None
     def status(self,status):
         if status==QMediaPlayer.MediaStatus.EndOfMedia:
             if self.loop:self.seek(self.loop[0]);self.play()
