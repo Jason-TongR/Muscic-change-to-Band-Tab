@@ -11,9 +11,27 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 ROOT=Path(__file__).resolve().parent.parent
 sys.path.insert(0,str(ROOT))
 from bandtab import __version__
+
+INNO_LANGUAGE_URL='https://raw.githubusercontent.com/jrsoftware/issrc/6ef32198ef1f7b7b375cd4b6b90896c2a58eb4c2/Files/Languages/ChineseSimplified.isl'
+INNO_LANGUAGE_SHA256='e0b0b350e2245f3c5e65586dfe43d574f6e7f06f2261149aba284954b3fc9a8d'
+
+
+def inno_language(compiler,cache):
+    bundled=compiler.parent/'Languages/ChineseSimplified.isl'
+    if bundled.is_file():return bundled
+    target=cache/'ChineseSimplified.isl'
+    if target.is_file() and sha256(target)==INNO_LANGUAGE_SHA256:return target
+    print('Preparing the official Inno Setup Simplified Chinese translation...',flush=True)
+    with urllib.request.urlopen(INNO_LANGUAGE_URL,timeout=60) as response:data=response.read()
+    if hashlib.sha256(data).hexdigest()!=INNO_LANGUAGE_SHA256:
+        raise ValueError('Inno Setup language checksum mismatch')
+    cache.mkdir(parents=True,exist_ok=True)
+    target.write_bytes(data)
+    return target
 
 
 def find_inno():
@@ -52,8 +70,7 @@ def main():
     compiler=find_inno() if system=='Windows' else None
     if args.require_installer and not compiler:
         raise SystemExit('Install Inno Setup 6.5+ from https://jrsoftware.org/isdl.php or set ISCC to ISCC.exe.')
-    if compiler and not (compiler.parent/'Languages/ChineseSimplified.isl').is_file():
-        raise SystemExit('The installer requires Inno Setup 6.5+ with Languages/ChineseSimplified.isl.')
+    language=inno_language(compiler,ROOT/'data/build-tools/inno') if compiler else None
     os.chdir(ROOT)
     os.environ['BANDTAB_MODEL_HOME']=str(ROOT/'data/models')
     if not args.skip_model:
@@ -81,7 +98,8 @@ def main():
         else:
             shutil.make_archive(str(release/name),'zip' if system=='Windows' else 'gztar',ROOT/'dist','BandTabStudio')
     if compiler:
-        subprocess.run([str(compiler),'/DMyAppVersion='+__version__,str(ROOT/'packaging/windows.iss')],check=True)
+        subprocess.run([str(compiler),'/DMyAppVersion='+__version__,
+            '/DMyLanguageFile='+str(language),str(ROOT/'packaging/windows.iss')],check=True)
     elif system=='Windows':
         print('Portable build only: Inno Setup is missing. Use --require-installer for a complete Windows release.')
     # The example is generated from our own synthetic riff, never from a user's audio.
