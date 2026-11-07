@@ -25,7 +25,7 @@ def capabilities():
 def separate(source, directory, config, check):
     exe = audio.ffmpeg_path()
     env = os.environ.copy()
-    env['TORCH_HOME'] = str(directory.parent / 'models')
+    env['TORCH_HOME'] = os.environ.get('BANDTAB_MODEL_HOME', str(directory.parent / 'models'))
     if exe:
         bindir = directory / 'bin'
         bindir.mkdir(exist_ok=True)
@@ -37,11 +37,13 @@ def separate(source, directory, config, check):
                 import shutil
                 shutil.copy2(exe, link)
         env['PATH'] = str(bindir.resolve()) + os.pathsep + env.get('PATH', '')
-    command = [sys.executable, '-m', 'demucs', '-n', 'htdemucs_6s', '--shifts', '2',
+    from .runtime import worker_command, process_options
+    prefix = worker_command('--demucs-worker') if getattr(sys, 'frozen', False) else [sys.executable, '-m', 'demucs']
+    command = prefix + ['-n', 'htdemucs_6s', '--shifts', '2',
                '--overlap', '0.25', '--segment', '7', '-d', config['device'],
                '-o', str(directory / 'stems'), str(source)]
     with (directory/'separation.log').open('w') as log:
-        process = subprocess.Popen(command, stdout=log, stderr=log, env=env)
+        process = subprocess.Popen(command, stdout=log, stderr=log, env=env, **process_options())
         try:
             while process.poll() is None:
                 check()
@@ -136,6 +138,9 @@ def transcribe(source, directory, raw_config, update=lambda *args: None, check=l
                 '和弦仅为大/小三和弦参考；识别分数不是准确率。推弦、滑音、闷音等奏法尚不还原。']
     if config['mode'] == 'band':
         update(20, '正在分离六个声部；首次会下载模型，请耐心等待')
+        if os.environ.get('BANDTAB_MODEL_HOME'):
+            from .runtime import ensure_model
+            ensure_model(lambda n, message: update(20+int(n*.05), message), check)
         sources = separate(target, directory, config, check)
         warnings += ['吉他轨可能混有多把吉他，不能保证主音/节奏吉他分开。',
                      '鼓谱是低/中/高频起音估计，仅提供底鼓、军鼓、踩镲参考；不能识别完整鼓组。']

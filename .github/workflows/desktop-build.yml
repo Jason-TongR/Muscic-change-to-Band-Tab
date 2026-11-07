@@ -1,0 +1,65 @@
+name: Build desktop applications
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            name: Linux-x64
+          - os: windows-2022
+            name: Windows-x64
+          - os: macos-15
+            name: macOS-arm64
+          - os: macos-15-intel
+            name: macOS-Intel
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    env:
+      QT_QPA_PLATFORM: offscreen
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      NUMBA_NUM_THREADS: '2'
+      BANDTAB_HOME: ${{ github.workspace }}/data/ci-home
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Linux Qt runtime dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libxkbcommon0 libxcb-cursor0 libopengl0 libasound2
+      - name: Install isolated build environment
+        run: python scripts/setup_desktop.py
+      - name: Test, build and test packaged executable (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          .venv-desktop/bin/python -m unittest discover -s tests -v
+          .venv-desktop/bin/python scripts/build_desktop.py --archive
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            dist/BandTabStudio.app/Contents/MacOS/BandTabStudio --self-test --ai
+          else
+            dist/BandTabStudio/BandTabStudio --self-test --ai
+          fi
+      - name: Test, build and test packaged executable (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & .venv-desktop/Scripts/python.exe -m unittest discover -s tests -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .venv-desktop/Scripts/python.exe scripts/build_desktop.py --archive
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $p = Start-Process -FilePath dist/BandTabStudio/BandTabStudio.exe -ArgumentList '--self-test','--ai' -PassThru -Wait
+          exit $p.ExitCode
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BandTab-${{ matrix.name }}
+          path: |
+            release/*
+            data/ci-home/self-test-report.json
+            data/ci-home/desktop-preview.png
+          if-no-files-found: error
