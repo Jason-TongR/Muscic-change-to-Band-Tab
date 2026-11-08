@@ -44,6 +44,8 @@ def ensure_model(update=lambda *args:None, check=lambda:None):
     bundled = resources()/'bundled_models'/MODEL_FILE
     if valid_model(bundled):
         shutil.copy2(bundled,target);update(100,'已启用随软件提供的离线模型');return target
+    if os.environ.get('BANDTAB_OFFLINE')=='1':
+        raise FileNotFoundError('离线模式下缺少有效模型，请使用包含模型的完整发行包。')
     partial = target.with_suffix('.download')
     try:
         update(0,'正在下载分轨模型（约 55 MB）')
