@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | `BandTabStudio-Windows-x64-Setup.exe` | 希望有安装向导、快捷方式和卸载入口 | 双击安装，随后从开始菜单打开 |
 | `BandTabStudio-Windows-x64-Portable.zip` | 希望解压使用 | 完整解压，双击目录中的 `BandTabStudio.exe` |
-| `原创练习曲.bandtab` | 想先体验跟谱与编辑 | 在程序里使用「打开分享项目…」导入 |
+| `practice-demo.bandtab` | 想先体验跟谱与编辑 | 在程序里使用「打开分享项目…」导入 |
 | `SHA256SUMS.json` | 核对程序包及示例项目下载是否完整 | 比对对应文件的 SHA-256 |
 
 安装版和便携版都包含 CPU 识别引擎、运行库、音频解码器及模型，不需要使用者安装 Python。便携版也需要保留 `_internal` 等完整目录。

@@ -71,14 +71,14 @@ Windows 版的应用版本是 **0.2.1**。先等 Windows 工作流成功、确�
 
 ### 上传哪些附件
 
-从成功的 Windows 构建页面下载 `BandTabStudio-Windows-x64`，解压 Actions 外层 ZIP，上传里面这 **6 个文件**：
+从成功的 Windows 构建页面下载 `BandTabStudio-Windows-x64`，解压 Actions 外层 ZIP，将示例曲改为英文名 `practice-demo.bandtab`，同步更新校验清单后上传下列文件。本次 Release 另保留原始 `SHA256SUMS.json`，用于追溯构建时的中文文件名：
 
 | 文件 | 是否需要 | 用途 |
 | --- | --- | --- |
 | `BandTabStudio-Windows-x64-Setup.exe` | 必须 | 推荐给普通用户的中文安装程序 |
 | `BandTabStudio-Windows-x64-Portable.zip` | 必须 | 免安装完整便携包 |
-| `原创练习曲.bandtab` | 建议 | 含音频与预编谱的示例项目 |
-| `SHA256SUMS.json` | 必须 | 核对上述两个软件包和示例文件的完整性 |
+| `practice-demo.bandtab` | 建议 | 含音频与预编谱的示例项目 |
+| `SHA256SUMS-release.json` | 必须 | 核对上述两个软件包和示例文件的完整性 |
 | `Windows-validation.json` | 建议 | 本次 Windows 安装与模型测试结果 |
 | `build-info-Windows-AMD64.json` | 建议 | 应用版本、源码提交、依赖版本与校验记录 |
 
