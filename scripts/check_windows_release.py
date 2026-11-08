@@ -21,10 +21,22 @@ APP_ID='{C893045E-E753-491D-93B0-FD1EF9088E15}_is1'
 
 
 def run_process(command,cwd,env,log,timeout=900):
+    label=Path(log).stem
+    print('Starting '+label,flush=True)
     with Path(log).open('w',encoding='utf8') as stream:
         process=subprocess.Popen([str(x) for x in command],cwd=cwd,env=env,
             stdout=stream,stderr=stream,creationflags=subprocess.CREATE_NO_WINDOW)
-        try:code=process.wait(timeout=timeout)
+        deadline=time.monotonic()+timeout
+        try:
+            while True:
+                remaining=deadline-time.monotonic()
+                if remaining<=0:raise subprocess.TimeoutExpired(command,timeout)
+                try:
+                    code=process.wait(timeout=min(30,remaining));break
+                except subprocess.TimeoutExpired:
+                    print('Waiting for '+label,flush=True)
+                    recent=Path(log).read_text(encoding='utf8',errors='replace').splitlines()
+                    if recent:print(recent[-1][-800:],flush=True)
         except subprocess.TimeoutExpired:
             subprocess.run([str(Path(os.environ['SystemRoot'])/'System32/taskkill.exe'),
                 '/PID',str(process.pid),'/T','/F'],capture_output=True,
@@ -32,6 +44,7 @@ def run_process(command,cwd,env,log,timeout=900):
             process.wait(timeout=15)
             raise RuntimeError('Timed out: '+str(command[0]))
     if code:raise RuntimeError(f'{Path(command[0]).name} exited with {code}; see {log}')
+    print('Finished '+label,flush=True)
 
 
 def registry_value(key,name=''):
@@ -68,7 +81,7 @@ def check_app(executable,home,cwd,output,name,ai=False):
     home.mkdir(parents=True,exist_ok=True)
     command=[executable,'--self-test']+(['--ai'] if ai else [])
     try:
-        run_process(command,cwd,isolated_environment(home),output/(name+'-process.log'))
+        run_process(command,cwd,isolated_environment(home),output/(name+'-process.log'),timeout=780 if ai else 180)
     finally:
         for file in home.glob('*'):
             if file.suffix in ('.log','.json','.png') and file.is_file():
