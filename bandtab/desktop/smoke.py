@@ -20,7 +20,7 @@ def run(root,ai=False):
     report_path.unlink(missing_ok=True)
     app=QApplication.instance() or QApplication([])
     app.setStyle('Fusion')
-    report={};window=None
+    report={};window=None;target=None
     try:
         with tempfile.TemporaryDirectory(prefix='BandTab 中文 路径 ') as tmp:
             try:
@@ -49,7 +49,13 @@ def run(root,ai=False):
                     process=subprocess.Popen(worker_command('--worker',str(target/'request.json')),
                         stdout=log,stderr=log,**process_options())
                     deadline=time.monotonic()+(600 if ai else 90)
+                    last_status=None
                     while process.poll() is None and time.monotonic()<deadline:
+                        status_file=target/'status.json'
+                        if status_file.exists():
+                            status=status_file.read_text(encoding='utf8')
+                            if status!=last_status:
+                                print(json.dumps(json.loads(status),ensure_ascii=True),flush=True);last_status=status
                         app.processEvents();time.sleep(.05)
                     if process.poll() is None:
                         (target/'cancel').touch()
@@ -71,6 +77,11 @@ def run(root,ai=False):
                 report['frozen_worker_band' if ai else 'worker_transcription']='pass'
                 report['unicode_paths']='pass'
             finally:
+                # Keep evidence before TemporaryDirectory cleans up a failed job.
+                if target:
+                    for name in ('error.log','separation.log','status.json'):
+                        if (target/name).is_file():
+                            (root/('worker-status.json' if name=='status.json' else name)).write_bytes((target/name).read_bytes())
                 if window:
                     window.close();window.deleteLater();app.processEvents()
                     QCoreApplication.sendPostedEvents(None,QEvent.Type.DeferredDelete)
