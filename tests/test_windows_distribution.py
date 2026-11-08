@@ -1,10 +1,12 @@
 """Distribution contracts that can be checked before the native Windows run."""
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
 import struct
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 from bandtab.runtime import ensure_model,process_options
@@ -13,6 +15,31 @@ from scripts.check_windows_release import assert_x64_executable,isolated_environ
 
 
 class WindowsDistributionTests(unittest.TestCase):
+    def test_redirected_windows_logs_accept_chinese_paths(self):
+        import desktop
+        output=io.BytesIO();errors=io.BytesIO()
+        out=io.TextIOWrapper(output,encoding='cp1252')
+        err=io.TextIOWrapper(errors,encoding='cp1252')
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.dict(os.environ,{'BANDTAB_HOME':tmp}),patch('sys.stdout',out),patch('sys.stderr',err):
+                desktop.configure()
+                print('中文 音频路径')
+                err.write('中文 错误\n');err.flush();out.flush()
+            self.assertIn('中文 音频路径',output.getvalue().decode('utf8'))
+            self.assertIn('中文 错误',errors.getvalue().decode('utf8'))
+    def test_background_exception_returns_failure_without_a_dialog(self):
+        import desktop
+        parent=types.ModuleType('demucs');parent.__path__=[]
+        child=types.ModuleType('demucs.separate')
+        def fail(args):raise RuntimeError('中文路径处理失败')
+        child.main=fail
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch('desktop.configure',return_value=Path(tmp)), \
+                 patch('sys.argv',['BandTabStudio.exe','--demucs-worker']), \
+                 patch('sys.stderr',io.StringIO()), \
+                 patch.dict('sys.modules',{'demucs':parent,'demucs.separate':child}):
+                self.assertEqual(desktop.main(),1)
+            self.assertIn('中文路径处理失败',(Path(tmp)/'worker-fatal.log').read_text(encoding='utf8'))
     def test_offline_mode_fails_without_attempting_a_download(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
