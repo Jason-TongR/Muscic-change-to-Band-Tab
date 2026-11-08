@@ -6,7 +6,7 @@
 
 | 我的电脑 | 从这里开始 | 当前状态 |
 | --- | --- | --- |
-| Windows 64 位 | [Windows 下载与运行](#windows) | 安装包尚未提供，可尝试源码运行；待实机验证 |
+| Windows x64 | [Windows 下载与运行](#windows) | 安装版、便携版已构建并通过 Windows 自动验证 |
 | macOS（Apple Silicon / Intel） | [macOS 下载与运行](#macos) | 安装包尚未提供，可尝试源码运行；待实机验证 |
 | Linux x86_64 | [Linux 下载与运行](#linux) | 已构建并自检通过便携包，兼容条件见下文 |
 
@@ -14,18 +14,24 @@
 
 完整发行包自带运行库和模型，不需要安装 Python。GitHub 自动显示的 **Source code (zip / tar.gz)** 是源码，不是可直接运行的软件。
 
-以下平台状态截至 **2026-11-07**。首次使用也可以先读[转谱步骤](#第一次转谱)、[分享方式](#分享与导出)和[识别限制](#识别能力与限制)。
+以下平台状态截至 **2026-11-08**。首次使用也可以先读[转谱步骤](#第一次转谱)、[分享方式](#分享与导出)和[识别限制](#识别能力与限制)。
 
 ### Windows
 
-**目前状态：** 已准备 Windows x64 构建配置，尚未生成或验证 Windows 成品包。
+**系统要求：** Windows 10 1809 及以上或 Windows 11，x64 电脑。安装版与便携版已在 Windows 构建机通过界面、中文路径、项目导入导出、离线 AI 转谱、安装、重复安装及卸载验证。
 
-提供成品后，在 Releases 中选择其中一种：
+在 Releases 中选择其中一种：
 
 | 附件 | 启动方法 |
 | --- | --- |
 | `BandTabStudio-Windows-x64-Setup.exe` | 运行安装程序，安装后打开 BandTab Studio |
-| `BandTabStudio-Windows-AMD64.zip` | 完整解压，运行文件夹中的 `BandTabStudio.exe`，保留同目录其他文件 |
+| `BandTabStudio-Windows-x64-Portable.zip` | 完整解压，运行文件夹中的 `BandTabStudio.exe`，保留同目录其他文件 |
+
+一般用户推荐安装版，支持中文安装向导、开始菜单快捷方式和卸载。安装无需管理员权限，曲库保存在 `%LOCALAPPDATA%\BandTab Studio\`，卸载保留曲库。便携版也需要完整解压，不能在压缩包内直接启动。
+
+安装版和便携版包含 CPU AI 引擎及模型，不需要 Python。详细的安装、数据备份和构建方法见 [Windows 使用说明](docs/WINDOWS.md)。
+
+**Release 尚未上传时：** 已登录 GitHub 的用户可到 [Windows 构建记录](https://github.com/Jason-TongR/Muscic-change-to-Band-Tab/actions/workflows/windows-build.yml)，选择最新成功记录，下载页面底部的 `BandTabStudio-Windows-x64`，解压外层 ZIP 后取得上述两个文件。Actions 附件只保留 14 天；对外长期分发请使用 Release。
 
 <details>
 <summary>暂时没有安装包？从源码运行（需要 Python 3.11）</summary>
@@ -149,7 +155,7 @@ python3.11 scripts/setup_desktop.py
 
 `.bandtab` 包含谱子、原曲和分离音轨；对方可以直接跟谱、试听和编辑，不需要重新识别。**它不是安装包，不能代替软件。**
 
-如果 Release 附带 `原创练习曲.bandtab`，可以下载后通过「打开分享项目…」导入，测试这套分享流程。
+如果 Release 附带 `practice-demo.bandtab`，可以下载后通过「打开分享项目…」导入，测试这套分享流程。
 
 ### 交给其他音乐软件继续处理
 
@@ -201,20 +207,22 @@ MIDI 保留音符实际起止时间，使用固定 120 BPM 编码，不包含原
 | 操作 | Windows PowerShell | Linux / macOS 终端 |
 | --- | --- | --- |
 | 运行桌面版 | `.\.venv-desktop\Scripts\python.exe desktop.py` | `.venv-desktop/bin/python desktop.py` |
-| 构建发行包 | `.\.venv-desktop\Scripts\python.exe scripts/build_desktop.py --archive` | `.venv-desktop/bin/python scripts/build_desktop.py --archive` |
+| 构建发行包 | 双击 `build-windows.cmd` | `.venv-desktop/bin/python scripts/build_desktop.py --archive` |
 | 运行测试 | `.\.venv-desktop\Scripts\python.exe -m unittest discover -s tests -v` | `.venv-desktop/bin/python -m unittest discover -s tests -v` |
 
-打包需在目标系统分别执行。程序目录生成在 `dist/`，发布用的压缩包等产物生成在 `release/`。Windows 安装程序额外需要 Inno Setup；Mac 签名、公证和其他平台细节见[桌面版详细说明](docs/DESKTOP.md#三个平台的打包)。
+打包需在目标系统分别执行。程序目录生成在 `dist/`，发布用的压缩包等产物生成在 `release/`。Windows 全套构建需要 Python 3.11 x64 和 Inno Setup 6.5 及以上，会自动测试便携运行、安装、模型转写、重复安装与卸载，详见 [Windows 构建说明](docs/WINDOWS.md#开发者一键构建)。Mac 签名、公证和其他平台细节见[桌面版详细说明](docs/DESKTOP.md#三个平台的打包)。
 
-仓库提供[手动构建工作流](.github/workflows/desktop-build.yml)。它分别构建四个平台并自检，产物保存在 Actions artifacts；不会自动创建或发布 GitHub Release。
+仓库提供 [Windows 专用构建](.github/workflows/windows-build.yml)和[四平台手动构建](.github/workflows/desktop-build.yml)。产物保存在 Actions artifacts；不会自动创建或发布 GitHub Release。维护者填写 About 和选择发布附件时，请按[发布指南](docs/PUBLISHING.md)操作。
 
 想继续使用浏览器版或命令行批量转写，请看[旧网页版与命令行说明](docs/WEB.md)。`scripts/start.sh` 是网页版入口，`scripts/start_desktop.sh` 是桌面版入口。
 
 ### 验证范围
 
-截至 2026-11-07，Linux 环境的 26 项自动测试已通过；独立程序已通过界面渲染、项目包导入导出、识别进程和真实 AI 分离转谱检查。
+截至 2026-11-08，Linux 源码环境的 36 项自动测试已通过；Linux 独立程序已通过界面渲染、项目包导入导出、识别进程和真实 AI 分离转谱检查。
 
-当前测试环境没有实体显示会话和音频输出设备，界面使用离屏渲染检查；实际扬声器播放以及 Windows/macOS 安装运行仍需对应设备验证。这些检查证明功能流程可运行，不代表真实歌曲识别准确率。
+Windows x64 构建机也已通过 36 项测试，并使用打包后的 EXE 检查原生窗口、中文路径、离线六轨 AI 转谱、安装、重复安装和卸载保留曲库。每个 Windows 成品包附带 `Windows-validation.json` 与构建信息。
+
+Linux 界面使用离屏渲染检查；Windows 使用原生 Windows 窗口组件。实体扬声器、耳机与各种驱动尚未全面测试，macOS 安装运行仍待验证。这些检查证明功能流程可运行，不代表真实歌曲识别准确率。
 
 程序支持 `--self-test` 自检，附加 `--ai` 会实际运行模型。使用上表中的环境 Python 执行 `desktop.py --self-test --ai`；打包后也可以让可执行程序带上同样参数运行。
 

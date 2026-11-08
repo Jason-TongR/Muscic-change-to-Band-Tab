@@ -42,12 +42,14 @@ def read_wav(path):
 
 
 def decode(source, dest, max_seconds=900):
+    from .runtime import process_options
     exe = ffmpeg_path()
     if exe:
         # Decode at most max+1 seconds to bound memory and reject, never silently truncate.
         result = subprocess.run([exe, '-nostdin', '-v', 'error', '-y', '-i', str(source),
                                  '-t', str(max_seconds+1), '-vn', '-ac', '2', '-ar', '44100',
-                                 '-c:a', 'pcm_s16le', str(dest)], capture_output=True, timeout=180)
+                                 '-c:a', 'pcm_s16le', str(dest)], capture_output=True, timeout=180,
+                                **process_options())
         if result.returncode:
             raise ValueError('无法解码音频，请检查文件是否损坏。支持 WAV / MP3 / FLAC / M4A / OGG。')
     else:

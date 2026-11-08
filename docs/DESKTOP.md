@@ -49,11 +49,11 @@ python scripts/setup_desktop.py
 python scripts/build_desktop.py --archive
 ```
 
-- Windows x64：`dist/BandTabStudio/` 便携目录及 ZIP；装有 Inno Setup 6 时额外生成 `.exe` 安装包，按当前用户安装、无需管理员权限。分享整个目录或安装包，不要只复制单个 EXE。
+- Windows x64：`dist/BandTabStudio/` 便携目录及 ZIP；装有 Inno Setup 6.5 及以上时额外生成 `.exe` 安装包，按当前用户安装、无需管理员权限。分享整个目录或安装包，不要只复制单个 EXE。
 - macOS：生成 `BandTabStudio.app`、ZIP 和 DMG；Intel 与 Apple Silicon 在对应架构分别构建，最低 macOS 13。Intel Mac 使用仍提供 x86_64 轮子的 PyTorch 2.2.2，其他目标使用 2.5.1。正式面向公众分发还需要开发者证书签名、公证；未签名测试版不声称可绕过系统安全检查。
 - Linux x64：生成便携目录及 `.tar.gz`；解压后运行其中的 `BandTabStudio`。便携包仍依赖目标发行版的系统图形/音频库和 glibc，不是任意 Linux 通用二进制。建议在支持范围最旧的发行版上构建。
 
-PyInstaller 不跨操作系统生成可执行程序。本仓库提供 `.github/workflows/desktop-build.yml`，手动触发后在 Windows、Linux、macOS Apple Silicon、macOS Intel 四种 runner 上分别构建，并运行打包程序的自检，产物留在 Actions artifacts。本次本机开发只直接验证 Linux；其余系统的产物须等待对应 runner 成功后才能声明可用。工作流文件已经准备，不会自动上传源码或发布发行版。
+PyInstaller 不跨操作系统生成可执行程序。本仓库提供 `.github/workflows/desktop-build.yml`，手动触发后在 Windows、Linux、macOS Apple Silicon、macOS Intel 四种 runner 上分别构建，并运行打包程序的自检，产物留在 Actions artifacts。Windows 另有专用构建流程与 `build-windows.cmd` 一键入口，会检查便携运行、试装、离线模型、重复安装及卸载，详见 [Windows 说明](WINDOWS.md)。以每次实际报告为准；工作流不会自动发布发行版。
 
 ## 验证
 
@@ -79,4 +79,4 @@ CI 下可设置 `QT_QPA_PLATFORM=offscreen`，无须实体显示器。自检会�
 
 本机为 Ubuntu 26.04 / x86_64 / glibc 2.43。已完成原生界面、音符编辑与指法、保存撤销、混音音量控制、项目包迁移测试，以及独立可执行文件的完整 AI 分离与转谱自检。自检使用原创合成短音频，不代表真实歌曲识别准确率。
 
-当前运行环境没有实体显示会话和可用音频输出设备，窗口通过 Qt 离屏渲染验证。真实扬声器/耳机发声、Windows 和 macOS 机器上的安装/播放还需对应环境验证。此处产生的 Linux 便携包标注 glibc 版本，不宣称可运行在较旧的发行版；跨平台工作流以 Ubuntu 22.04 构建更广泛兼容的 Linux 包。
+当前运行环境没有实体显示会话和可用音频输出设备，窗口通过 Qt 离屏渲染验证。真实扬声器/耳机发声与 macOS 安装运行还需对应设备验证。Windows 安装测试结果单独记录在 `Windows-validation.json`。此处产生的 Linux 便携包标注 glibc 版本，不宣称可运行在较旧的发行版；跨平台工作流以 Ubuntu 22.04 构建更广泛兼容的 Linux 包。

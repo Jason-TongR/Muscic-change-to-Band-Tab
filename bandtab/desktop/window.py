@@ -352,4 +352,4 @@ class MainWindow(QMainWindow):
         try:
             if self.dirty:self.save_current()
         except Exception as e:self.error(e);event.ignore();return
-        self.transport.stop();event.accept()
+        self.transport.shutdown();event.accept()

@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import platform
+import struct
 import venv
 
 ROOT=Path(__file__).resolve().parent.parent
@@ -12,6 +13,8 @@ def run(*args):subprocess.run([str(v) for v in args],cwd=ROOT,check=True)
 
 def main():
     if sys.version_info[:2]!=(3,11):raise SystemExit('开发环境请使用 Python 3.11；普通用户使用打包后的程序，无需 Python。')
+    if sys.platform=='win32' and struct.calcsize('P')!=8:
+        raise SystemExit('Windows 构建需要 64 位 Python 3.11，请安装 x64 版本。')
     env=ROOT/'.venv-desktop'
     if not env.exists():venv.EnvBuilder(with_pip=True).create(env)
     python=env/('Scripts/python.exe' if sys.platform=='win32' else 'bin/python')

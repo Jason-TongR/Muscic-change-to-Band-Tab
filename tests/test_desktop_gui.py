@@ -7,7 +7,7 @@ import tempfile
 import unittest
 try:
     from PySide6.QtWidgets import QApplication,QDialog
-    from PySide6.QtCore import QTimer,Qt
+    from PySide6.QtCore import QTimer,Qt,QCoreApplication,QEvent
     from PySide6.QtTest import QTest
     QT=True
 except ImportError:QT=False
@@ -24,7 +24,16 @@ class DesktopGUITests(unittest.TestCase):
         folder=self.window.library.create_folder();self.project=demo.create(folder);self.window.library.save(self.project)
         self.window.open_project(self.project);self.window.show();self.app.processEvents()
     def tearDown(self):
-        self.window.close();self.window.deleteLater();self.app.processEvents();self.tmp.cleanup()
+        self.window.close();self.window.deleteLater();self.app.processEvents()
+        QCoreApplication.sendPostedEvents(None,QEvent.Type.DeferredDelete)
+        self.tmp.cleanup()
+    def test_close_releases_audio_files_for_windows_cleanup(self):
+        audio_paths=[self.window.library.asset(self.project)]+[
+            self.window.library.asset(self.project,t) for t in self.project['tracks']]
+        self.window.close();self.app.processEvents()
+        QCoreApplication.sendPostedEvents(None,QEvent.Type.DeferredDelete)
+        for path in set(audio_paths):
+            moved=path.with_suffix('.closed.wav');path.rename(moved);moved.unlink()
     def test_native_controls_and_track_filter(self):
         w=self.window;self.assertEqual(w.table.rowCount(),192)
         w.track.setCurrentIndex(2);self.app.processEvents()

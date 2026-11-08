@@ -20,6 +20,11 @@ def configure():
         log = open(root/'desktop.log','a',encoding='utf8',buffering=1)
         if sys.stdout is None:sys.stdout = log
         if sys.stderr is None:sys.stderr = log
+    # Frozen Python does not necessarily honor PYTHONUTF8/PYTHONIOENCODING.
+    # Redirected Windows handles can still use cp1252, including worker logs.
+    for stream in (sys.stdout,sys.stderr):
+        if hasattr(stream,'reconfigure'):
+            stream.reconfigure(encoding='utf8',errors='backslashreplace',line_buffering=True)
     return root
 
 
@@ -53,13 +58,22 @@ def main():
     import multiprocessing
     multiprocessing.freeze_support()
     root = configure()
-    if len(sys.argv)>1 and sys.argv[1]=='--worker':return worker(sys.argv[2])
-    if len(sys.argv)>1 and sys.argv[1]=='--demucs-worker':
-        from demucs.separate import main as separate
-        separate(sys.argv[2:]);return 0
-    if len(sys.argv)>1 and sys.argv[1]=='--self-test':
-        from bandtab.desktop.smoke import run
-        return run(root, ai='--ai' in sys.argv)
+    if len(sys.argv)>1 and sys.argv[1] in ('--worker','--demucs-worker','--self-test'):
+        try:
+            if sys.argv[1]=='--worker':return worker(sys.argv[2])
+            if sys.argv[1]=='--demucs-worker':
+                from demucs.separate import main as separate
+                separate(sys.argv[2:]);return 0
+            from bandtab.desktop.smoke import run
+            return run(root, ai='--ai' in sys.argv)
+        except Exception:
+            # A frozen worker must fail with an exit code, not wait forever on
+            # PyInstaller's unhandled-exception dialog behind the main window.
+            import traceback
+            error=traceback.format_exc()
+            (root/'worker-fatal.log').write_text(error,encoding='utf8')
+            print(error,file=sys.stderr,flush=True)
+            return 1
     from PySide6.QtWidgets import QApplication
     from PySide6.QtCore import Qt, QTimer
     from bandtab.desktop.window import MainWindow

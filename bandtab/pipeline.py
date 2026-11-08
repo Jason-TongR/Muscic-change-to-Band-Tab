@@ -42,7 +42,7 @@ def separate(source, directory, config, check):
     command = prefix + ['-n', 'htdemucs_6s', '--shifts', '2',
                '--overlap', '0.25', '--segment', '7', '-d', config['device'],
                '-o', str(directory / 'stems'), str(source)]
-    with (directory/'separation.log').open('w') as log:
+    with (directory/'separation.log').open('w',encoding='utf8') as log:
         process = subprocess.Popen(command, stdout=log, stderr=log, env=env, **process_options())
         try:
             while process.poll() is None:
