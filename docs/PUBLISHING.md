@@ -62,7 +62,7 @@ Windows 版的应用版本是 **0.2.1**。先等 Windows 工作流成功、确�
 | 字段 | 填写内容 |
 | --- | --- |
 | Tag | `v0.2.1-preview.1`（已使用则换新标签） |
-| Target | 生成本次软件包的提交，见 `build-info-Windows-AMD64.json` 的 `source_revision` |
+| Target | 包含本次构建源码的分支或提交；构建时的具体提交见 `build-info-Windows-AMD64.json` 的 `source_revision` |
 | Release title | `BandTab Studio v0.2.1-preview.1 · Windows 桌面预览版` |
 | Description | 复制[Windows 发布说明](releases/v0.2.1-preview.1.md)全文 |
 | This is a pre-release | 勾选 |
