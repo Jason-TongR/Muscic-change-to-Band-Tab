@@ -144,12 +144,16 @@ def main():
         run_process([uninstaller,'/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',
             '/LOG='+str(output/'uninstaller.log')],cwd,os.environ.copy(),output/'uninstaller-process.log',300)
         deadline=time.monotonic()+20
-        while (installed/'BandTabStudio.exe').exists() and time.monotonic()<deadline:time.sleep(.2)
+        # Inno's launcher can return while its helper finishes deleting itself.
+        while ((installed/'BandTabStudio.exe').exists() or uninstaller.exists()) and time.monotonic()<deadline:
+            time.sleep(.2)
         assert not (installed/'BandTabStudio.exe').exists()
+        assert not uninstaller.exists(), 'Uninstaller self-cleanup did not finish'
         assert registry_value('Software\\Classes\\BandTabStudio.Project\\shell\\open\\command') is None
         assert not shortcut.exists()
         assert sentinel.read_text(encoding='utf8')=='retain this user project'
         result['checks']['uninstall_preserves_library']='pass'
+        installer_started=False
         result['status']='pass'
     except Exception:
         result['status']='fail';result['error']=traceback.format_exc()
@@ -158,7 +162,9 @@ def main():
         if installer_started and uninstaller.is_file():
             try:run_process([uninstaller,'/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART'],
                 cwd,os.environ.copy(),output/'cleanup-process.log',300)
-            except Exception:result['cleanup_error']=traceback.format_exc()
+            except Exception:
+                result['cleanup_error']=traceback.format_exc()
+                result['status']='fail'
         (output/'windows-validation.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
         if result['status']=='pass':shutil.rmtree(work)
     print(json.dumps(result,ensure_ascii=False,indent=2))
